@@ -16,6 +16,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 const TOMTOM_KEY = import.meta.env.VITE_TOMTOM_API_KEY || '';
 const VECTOR_STYLE_URL = import.meta.env.VITE_MAP_STYLE_URL || '';
+// Set VITE_MAP_RASTER=true to force the flat raster basemap (no 3D buildings).
+const USE_RASTER = String(import.meta.env.VITE_MAP_RASTER || '').toLowerCase() === 'true';
 
 // RTA palette (mirrors src/index.css tokens).
 const RTA_RED = '#b91c2c';
@@ -30,7 +32,8 @@ const SEVERITY_COLOR = {
   unknown: '#64748b',
 };
 
-// Light TomTom raster basemap as a MapLibre style object (fallback default).
+// Light TomTom raster basemap as a MapLibre style object (flat — no 3D).
+// Used when VITE_MAP_RASTER=true, or as a fallback when no key is available.
 function rasterStyle(key) {
   return {
     version: 8,
@@ -48,6 +51,15 @@ function rasterStyle(key) {
       { id: 'tomtom-basic', type: 'raster', source: 'tomtom-basic' },
     ],
   };
+}
+
+// TomTom Orbis VECTOR style — ships 3D building (fill-extrusion) layers, so it
+// supports the tilted 3D view. This is the same style URL TomTom's own Maps SDK
+// builds. `map=basic_street-light` matches the UI's light/pearl theme.
+const ORBIS_STYLE_VERSION = '0.6.0-0';
+function orbisVectorStyleUrl(key, variant = 'basic_street-light') {
+  return `https://api.tomtom.com/maps/orbis/assets/styles/${ORBIS_STYLE_VERSION}/style.json` +
+    `?apiVersion=1&map=${variant}&key=${key}`;
 }
 
 function circleToPolygon(centerLngLat, radiusMeters, points = 64) {
@@ -87,11 +99,19 @@ export default function MapCard({ spec }) {
   useEffect(() => {
     if (!containerRef.current || missingKey) return undefined;
 
-    const style = VECTOR_STYLE_URL
-      ? (VECTOR_STYLE_URL.includes('key=') || !TOMTOM_KEY
-          ? VECTOR_STYLE_URL
-          : `${VECTOR_STYLE_URL}${VECTOR_STYLE_URL.includes('?') ? '&' : '?'}key=${TOMTOM_KEY}`)
-      : rasterStyle(TOMTOM_KEY);
+    // Basemap precedence: explicit custom style → forced raster → Orbis vector
+    // (default; supports 3D buildings) → raster fallback when no key.
+    let style;
+    if (VECTOR_STYLE_URL) {
+      style = VECTOR_STYLE_URL.includes('key=') || !TOMTOM_KEY
+        ? VECTOR_STYLE_URL
+        : `${VECTOR_STYLE_URL}${VECTOR_STYLE_URL.includes('?') ? '&' : '?'}key=${TOMTOM_KEY}`;
+    } else if (USE_RASTER || !TOMTOM_KEY) {
+      style = rasterStyle(TOMTOM_KEY);
+    } else {
+      style = orbisVectorStyleUrl(TOMTOM_KEY);
+    }
+    const isVector = Boolean(VECTOR_STYLE_URL) || (!USE_RASTER && Boolean(TOMTOM_KEY));
 
     const center = [spec.center?.lon ?? 55.2708, spec.center?.lat ?? 25.2048];
     const map = new maplibregl.Map({
@@ -113,15 +133,18 @@ export default function MapCard({ spec }) {
     const pushCoord = (lng, lat) => { if (Number.isFinite(lng) && Number.isFinite(lat)) allCoords.push([lng, lat]); };
 
     map.on('load', () => {
-      // 3D buildings (vector styles only — raster has no building layer)
-      if (VECTOR_STYLE_URL) {
-        const layers = map.getStyle().layers || [];
-        const buildingLayer = layers.find((l) => /building/i.test(l.id) && l.type === 'fill');
-        if (buildingLayer) {
-          try {
-            map.setPaintProperty(buildingLayer.id, 'fill-color', '#e7dfd3');
-          } catch { /* ignore */ }
-        }
+      // 3D buildings: vector styles (e.g. TomTom Orbis) ship fill-extrusion
+      // building layers — make sure they're visible and themed to the UI.
+      if (isVector) {
+        try {
+          for (const l of map.getStyle().layers || []) {
+            if (l.type === 'fill-extrusion' && /building/i.test(l.id)) {
+              map.setLayoutProperty(l.id, 'visibility', 'visible');
+              map.setPaintProperty(l.id, 'fill-extrusion-color', '#e7dfd3');
+              map.setPaintProperty(l.id, 'fill-extrusion-opacity', 0.92);
+            }
+          }
+        } catch { /* style without building layers — stay 2D */ }
       }
 
       // ---- Areas (isochrones / circles) ----
