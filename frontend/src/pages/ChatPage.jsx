@@ -120,7 +120,11 @@ export default function ChatPage() {
       if (res.errorCode && res.errorCode !== 0) {
         addMessage(activeChatId, { role: 'assistant', type: 'text', content: `RAM error: ${res.errorText || 'query failed'}`, isError: true });
       } else {
-        addMessage(activeChatId, { role: 'assistant', type: 'structured', data: res, query: q });
+        // Pull the final trace — its tool-call *outputs* carry payloads (like the
+        // tomtom-render-map spec) that RAM's embedded response.toolCalls omits.
+        let trace = null;
+        try { trace = await getQueryTrace(res.queryId || sub.queryId); } catch { /* best-effort */ }
+        addMessage(activeChatId, { role: 'assistant', type: 'structured', data: trace ? { ...res, trace } : res, query: q });
       }
     } catch (err) {
       addMessage(activeChatId, { role: 'assistant', type: 'text', content: `Error: ${err.message}`, isError: true });

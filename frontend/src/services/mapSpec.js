@@ -41,12 +41,17 @@ function deepFindMapSpec(value, depth = 0) {
 /** Returns the first tomtom.map spec found in a normalized RAM response, or null. */
 export function extractMapSpec(data) {
   if (!data) return null;
-  const calls = data.toolCalls || [];
-  for (const call of calls) {
-    // The map spec only appears in tool *output*, never in input (no `kind` key),
-    // so scanning the whole call object is safe.
-    const found = deepFindMapSpec(call.output ?? call.structuredContent ?? call._meta ?? call);
-    if (found) return found;
+  // Prefer the trace tool calls — they carry tool *outputs* (where the
+  // render-map spec lives). RAM's embedded response.toolCalls often omits them.
+  const callSets = [data.trace?.toolCalls, data.toolCalls];
+  for (const calls of callSets) {
+    if (!Array.isArray(calls)) continue;
+    for (const call of calls) {
+      // The map spec only appears in tool *output*, never in input (no `kind` key),
+      // so scanning the whole call object is safe.
+      const found = deepFindMapSpec(call.output ?? call.structuredContent ?? call._meta ?? call);
+      if (found) return found;
+    }
   }
   return null;
 }
