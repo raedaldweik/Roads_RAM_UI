@@ -524,6 +524,38 @@ _mock_sessions: dict[str, dict] = {}
 _mock_traces: dict[str, dict] = {}  # queryId → {"/toolCalls": [...], "/llmCalls": [...], "/retrievalCalls": [...]}
 
 
+def _mock_dubai_map_spec() -> dict:
+    """A sample tomtom-render-map spec (Burj Khalifa → Dubai Marina) so the
+    interactive MapCard renders in mock mode. Mirrors the MCP handler output."""
+    return {
+        "kind": "tomtom.map", "version": 1, "region": "AE",
+        "title": "Burj Khalifa → Dubai Marina",
+        "center": {"lat": 25.14, "lon": 55.21}, "zoom": 11, "pitch": 45, "bearing": -18,
+        "maxBounds": [51.0, 22.5, 56.5, 26.2],
+        "markers": [
+            {"lat": 25.1972, "lon": 55.2744, "label": "Burj Khalifa", "description": "Downtown Dubai"},
+            {"lat": 25.0805, "lon": 55.1403, "label": "Dubai Marina", "description": "Destination"},
+            {"lat": 25.1126, "lon": 55.1380, "label": "Mall of the Emirates",
+             "category": "Shopping", "color": "#0e7490"},
+        ],
+        "routes": [{
+            "label": "Fastest route", "color": "#b91c2c",
+            "distanceMeters": 21500, "travelTimeSeconds": 1320,
+            "points": [
+                {"lat": 25.1972, "lon": 55.2744}, {"lat": 25.1850, "lon": 55.2600},
+                {"lat": 25.1500, "lon": 55.2300}, {"lat": 25.1300, "lon": 55.1950},
+                {"lat": 25.1100, "lon": 55.1700}, {"lat": 25.0805, "lon": 55.1403},
+            ],
+        }],
+        "incidents": [{
+            "lat": 25.1600, "lon": 55.2380, "type": "Accident", "severity": "major",
+            "description": "Collision blocking 2 lanes on Sheikh Zayed Road",
+        }],
+        "areas": [],
+        "showTraffic": True, "autoFit": True,
+    }
+
+
 async def _mock_request(method: str, path: str, *, params: dict | None = None, json: dict | None = None) -> Any:
     params = params or {}
     if path == "/agents":
@@ -552,22 +584,46 @@ async def _mock_request(method: str, path: str, *, params: dict | None = None, j
         agent_id = (json or {}).get("agentId")
         agent = next((a for a in _MOCK_AGENTS if a["id"] == agent_id), None)
         target_name = agent["name"] if agent else "the selected collections"
+
+        # If the question looks map/route/traffic-related, simulate a TomTom
+        # agent: answer + a `tomtom-render-map` tool call carrying a Dubai spec,
+        # so the interactive MapCard renders in mock mode.
+        content_lc = (json["content"] or "").lower()
+        map_words = ("map", "route", "traffic", "directions", "navigate", "where", "near",
+                     "dubai", "marina", "burj", "drive", "road", "location")
+        if any(w in content_lc for w in map_words):
+            map_spec = _mock_dubai_map_spec()
+            answer = (f"**[Mock TomTom response from {target_name}]**\n\nHere's the fastest route across "
+                      "Dubai with live traffic. There's one incident reported on Sheikh Zayed Road. "
+                      "Unset `RAM_MOCK` and connect the TomTom MCP agent for real data.")
+            tool_calls = [
+                {"toolName": "tomtom-routing",
+                 "input": {"origin": "Burj Khalifa", "destination": "Dubai Marina"},
+                 "output": {"summary": {"lengthInMeters": 21500, "travelTimeInSeconds": 1320}}},
+                {"toolName": "tomtom-render-map",
+                 "input": {"title": map_spec["title"]},
+                 "output": map_spec},
+            ]
+        else:
+            answer = (f"**[Mock response from {target_name}]**\n\nYou asked: _{json['content']}_\n\n"
+                      "This is a simulated RAM answer. Point `RAM_API_URL` at a live "
+                      "SAS Retrieval Agent Manager deployment and unset `RAM_MOCK` to get real answers.")
+            tool_calls = [{"toolName": "retrieve_documents",
+                           "input": {"query": json["content"]},
+                           "output": {"documents": 1}}]
+
         query = {
             "id": str(uuid.uuid4()), "content": json["content"], "errorCode": 0, "errorText": None,
             "origin": "user", "querySessionId": sid,
             "target": "agent" if agent_id else "collection",
             "targetId": {"agentId": agent_id} if agent_id else {"configurationIds": json.get("collectionIds", [])},
             "response": {
-                "answer": f"**[Mock response from {target_name}]**\n\nYou asked: _{json['content']}_\n\n"
-                          "This is a simulated RAM answer. Point `RAM_API_URL` at a live "
-                          "SAS Retrieval Agent Manager deployment and unset `RAM_MOCK` to get real answers.",
+                "answer": answer,
                 "context": [{
                     "pageContent": "Example retrieved passage that grounded this answer.",
                     "metadata": {"filename": "example_document.pdf", "page": 3},
                 }],
-                "toolCalls": [{"toolName": "retrieve_documents",
-                               "input": {"query": json["content"]},
-                               "output": {"documents": 1}}],
+                "toolCalls": tool_calls,
                 "usageMetadata": {"llmPromptTokens": 220, "llmCompletionTokens": 96,
                                   "llmTotalTokens": 316, "llmTotalCost": 0.0014},
             },

@@ -1,6 +1,8 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ToolCallTrace from './ToolCallTrace';
+import MapCard from './MapCard';
+import { extractMapSpec } from '../services/mapSpec';
 
 const sourceLabel = (doc, i) => {
   const meta = doc?.metadata || {};
@@ -36,6 +38,7 @@ export default function ResponseCard({ data, onOpenSource, onOpenDetails }) {
   if (!data) return null;
   const usage = data.usage || {};
   const hasUsage = usage.llmTotalTokens != null || usage.llmTotalCost != null;
+  const mapSpec = extractMapSpec(data);
 
   return (
     <div className="animate-slide-up space-y-2.5 max-w-[640px]">
@@ -47,6 +50,9 @@ export default function ResponseCard({ data, onOpenSource, onOpenDetails }) {
           </ReactMarkdown>
         </div>
       </div>
+
+      {/* Interactive TomTom map, when the agent called tomtom-render-map */}
+      {mapSpec && <MapCard spec={mapSpec} />}
 
       {/* Retrieved context — click to view the passage */}
       {data.context && data.context.length > 0 && (
