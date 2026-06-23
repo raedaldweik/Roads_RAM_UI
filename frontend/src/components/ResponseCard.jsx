@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ToolCallTrace from './ToolCallTrace';
@@ -38,7 +39,9 @@ export default function ResponseCard({ data, onOpenSource, onOpenDetails }) {
   if (!data) return null;
   const usage = data.usage || {};
   const hasUsage = usage.llmTotalTokens != null || usage.llmTotalCost != null;
-  const mapSpec = extractMapSpec(data);
+  // Memoize so the map spec keeps a stable identity across re-renders (e.g. the
+  // live-trace polling of the next query), otherwise MapCard rebuilds the map.
+  const mapSpec = useMemo(() => extractMapSpec(data), [data]);
 
   return (
     <div className="animate-slide-up space-y-2.5 max-w-[640px]">

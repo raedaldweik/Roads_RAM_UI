@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -95,6 +95,10 @@ export default function MapCard({ spec }) {
   const mapRef = useRef(null);
   const [trafficOn, setTrafficOn] = useState(!!spec?.showTraffic);
   const [missingKey] = useState(!TOMTOM_KEY && !VECTOR_STYLE_URL);
+
+  // Rebuild the map only when the spec's *content* changes — not on every
+  // re-render — so polling the next query doesn't flicker/reload the map.
+  const specKey = useMemo(() => JSON.stringify(spec), [spec]);
 
   useEffect(() => {
     if (!containerRef.current || missingKey) return undefined;
@@ -253,7 +257,7 @@ export default function MapCard({ spec }) {
 
     return () => { map.remove(); mapRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spec, missingKey]);
+  }, [specKey, missingKey]);
 
   // React to traffic toggle without rebuilding the map.
   useEffect(() => {
