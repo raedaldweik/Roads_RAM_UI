@@ -7,6 +7,16 @@ COPY frontend/package*.json ./
 RUN npm ci
 
 COPY frontend/ ./
+# Vite inlines VITE_* vars at BUILD time, so the TomTom map key has to be
+# present now — not as a runtime env var. Railway (and `docker build`) supply
+# these as build args; leave them empty and everything works except the map
+# tiles. See the README "Deploying to Railway" section.
+ARG VITE_TOMTOM_API_KEY=""
+ARG VITE_MAP_STYLE_URL=""
+ARG VITE_MAP_RASTER=""
+ENV VITE_TOMTOM_API_KEY=$VITE_TOMTOM_API_KEY \
+    VITE_MAP_STYLE_URL=$VITE_MAP_STYLE_URL \
+    VITE_MAP_RASTER=$VITE_MAP_RASTER
 RUN npm run build
 
 

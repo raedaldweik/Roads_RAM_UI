@@ -110,6 +110,57 @@ docker run -p 8000:8000 --env-file backend/.env ram-chat-ui
 The Dockerfile builds the frontend and serves it from the FastAPI app on one port
 (same pattern as the Health repo — works on Railway/Render/Fly out of the box).
 
+## Deploying to Railway
+
+The repo is Railway-ready: `railway.json` points at the `Dockerfile`, which builds
+the React frontend and serves it from FastAPI on a single `$PORT`. A health check
+hits `/api/health`.
+
+**1. Create the service**
+- Push this repo to GitHub, then in Railway: **New Project → Deploy from GitHub repo**
+  and pick it. Railway auto-detects the Dockerfile — no build config needed.
+
+**2. Set variables** (service **Variables** tab). Two kinds matter here:
+
+| Variable | When it's used | Notes |
+|---|---|---|
+| `RAM_API_URL` | runtime | `https://<ram-host>/SASRetrievalAgentManager/api/v1` |
+| `RAM_VERIFY_SSL` | runtime | `false` only for self-signed certs |
+| `VITE_TOMTOM_API_KEY` | **build** | TomTom key for the interactive map tiles — Vite bakes it into the bundle at build time, so it must be set **before/at deploy**, not just at runtime. Restrict the key to your Railway domain. |
+| auth (see below) | runtime | how the backend gets a RAM token |
+
+Railway passes service variables to the Docker build as `--build-arg`s automatically,
+so setting `VITE_TOMTOM_API_KEY` in the Variables tab is enough for maps to work. If
+you change it later, trigger a redeploy (the bundle has to be rebuilt).
+
+**3. Pick an auth model — this matters for a hosted app.** The backend keeps the
+RAM token **in memory**, so:
+
+- **Interactive sign-in** (device/code flow) works, but the session lives in the
+  container — every redeploy or restart drops it and someone has to click *Sign in*
+  again. Fine for a quick demo; annoying for an always-on deployment.
+- **Service account (recommended for hosting)** — set `SAS_CLIENT_ID` /
+  `SAS_CLIENT_SECRET` (and optionally `SAS_USERNAME` / `SAS_PASSWORD` for a named
+  user, plus `SAS_LOGON_URL` for standalone RAM). The backend fetches and refreshes
+  the token itself: no sign-in screen, and it survives restarts.
+
+**4. Two caveats to check before you trust the URL**
+- **Network reach** — Railway runs in the public cloud, so it must be able to reach
+  `RAM_API_URL` over the internet. If RAM/Viya is on a private network or behind a
+  VPN/firewall, a public Railway service can't talk to it. Confirm the host is
+  reachable from outside first.
+- **It's single-session** — the in-memory token is shared by everyone who opens the
+  app. Treat the Railway URL as privileged: keep it private, or put Railway's access
+  controls / your own auth in front of it. Don't expose a signed-in RAM session to
+  the open internet.
+
+**Smoke test without RAM:** set `RAM_MOCK=true` (and nothing else) to confirm the
+deploy serves the UI end-to-end against the in-memory mock, then switch to the real
+`RAM_API_URL` + auth.
+
+Other platforms (Render, Fly, Cloud Run) work the same way — point them at the
+Dockerfile and pass `VITE_TOMTOM_API_KEY` as a build arg plus the runtime vars above.
+
 ## What the RAM API supports (and what it doesn't)
 
 Based on the v1 OpenAPI spec:
