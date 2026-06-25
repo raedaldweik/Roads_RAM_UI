@@ -390,7 +390,42 @@ def _target_ids(q: dict) -> dict:
 async def list_session_queries(session_id: str) -> list[dict]:
     body = await _request("GET", "/query", params={"filter": f"eq(querySessionId,'{session_id}')", "limit": 100})
     items = body.get("items") or []
-    return [_normalize_query(q) for q in items]
+    # A conversation turn is a top-level *user* query. Querying an agent also
+    # records the agent's own internal sub-queries (origin "agent", each with a
+    # parentQueryId) under the same session id — rendering those as chat bubbles
+    # is what made reloaded conversations look garbled. Keep only the user turns.
+    turns = [q for q in items
+             if (q.get("origin") or "user") == "user" and not q.get("parentQueryId")]
+    normalized = [_normalize_query(q) for q in turns]
+    # Re-attach each agent turn's tool calls (with their outputs) so an inline
+    # map renders on reload exactly like a live answer. RAM's persisted
+    # response.toolCalls omits the tool *outputs* where the tomtom-render-map
+    # spec lives, so without this the map would be missing from history.
+    await _attach_tool_outputs([n for n in normalized
+                                if n.get("queryId") and n.get("target") == "agent"])
+    return normalized
+
+
+async def _attach_tool_outputs(turns: list[dict], *, concurrency: int = 8) -> None:
+    """Fetch /toolCalls for each turn and stash them under `trace` (bounded
+    concurrency so a long history doesn't stampede RAM). Best-effort: a turn
+    whose trace can't be fetched simply renders without its map."""
+    if not turns:
+        return
+    sem = asyncio.Semaphore(concurrency)
+
+    async def one(turn: dict) -> None:
+        async with sem:
+            try:
+                body = await _request("GET", "/toolCalls",
+                                      params={"filter": f"eq(parentQueryId,'{turn['queryId']}')", "limit": 100})
+            except Exception:
+                return
+            items = body.get("items") or []
+            if items:
+                turn["trace"] = {"toolCalls": items}
+
+    await asyncio.gather(*(one(t) for t in turns), return_exceptions=True)
 
 
 async def submit_query(content: str, *, agent_id: str | None = None,
@@ -503,6 +538,8 @@ def _normalize_query(q: dict) -> dict:
         "usage": response.get("usageMetadata") or {},
         "target": q.get("target"),
         "targetId": q.get("targetId"),
+        "origin": q.get("origin"),
+        "parentQueryId": q.get("parentQueryId"),
         "errorCode": q.get("errorCode", 0),
         "errorText": q.get("errorText"),
     }
