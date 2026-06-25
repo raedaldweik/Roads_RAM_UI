@@ -59,6 +59,15 @@ class RamError(Exception):
 # ─── Token management ────────────────────────────────────────────────
 _token_cache: dict[str, Any] = {"token": None, "expires_at": 0.0, "refresh_token": None}
 _device_state: dict[str, str] = {}  # in-flight device authorization (verifier + device_code)
+# Serializes token refreshes. While a query runs the frontend polls the result
+# plus three trace endpoints every couple of seconds, so ~4 RAM calls are always
+# in flight. When the access token expires mid-query they would otherwise all
+# refresh at once — and Keycloak rotates the refresh token on every use and
+# revokes the whole family if a used token is presented again, so a concurrent
+# stampede invalidates everyone's session and the UI drops to the sign-in screen
+# (the "logged out on a long question" bug). With this lock one coroutine
+# refreshes and the rest reuse the token it stored.
+_token_lock = asyncio.Lock()
 
 
 def _oidc_base() -> str:
@@ -207,7 +216,11 @@ async def device_poll() -> dict:
 
 
 async def _refresh_token_grant() -> str | None:
-    """Renew the access token with the stored refresh token (any sign-in flow)."""
+    """Renew the access token with the stored refresh token (any sign-in flow).
+
+    The caller holds _token_lock, so this is the only refresh in flight — the
+    stored refresh token is therefore used exactly once, which is what
+    Keycloak's rotation/reuse-detection requires."""
     refresh = _token_cache.get("refresh_token")
     token_url = _token_cache.get("token_url")
     if not refresh or not token_url:
@@ -219,14 +232,22 @@ async def _refresh_token_grant() -> str | None:
         auth = (client_id, os.getenv("SAS_AUTH_CLIENT_SECRET", ""))
     else:
         data["client_id"] = client_id
-    async with httpx.AsyncClient(verify=VERIFY_SSL, timeout=TIMEOUT) as client:
-        r = await client.post(token_url, data=data, auth=auth)
-    if r.status_code != 200:
-        # Refresh token expired/revoked — user must sign in again
-        _token_cache["refresh_token"] = None
+    try:
+        async with httpx.AsyncClient(verify=VERIFY_SSL, timeout=TIMEOUT) as client:
+            r = await client.post(token_url, data=data, auth=auth)
+    except httpx.HTTPError:
+        # Network blip — keep the refresh token so the next call can retry
+        # instead of forcing the user to sign in again.
         return None
-    _store_tokens(r.json())
-    return _token_cache["token"]
+    if r.status_code == 200:
+        _store_tokens(r.json())
+        return _token_cache["token"]
+    if r.status_code in (400, 401):
+        # invalid_grant: the refresh token is genuinely expired or revoked —
+        # only now drop it so the UI prompts for a fresh sign-in.
+        _token_cache["refresh_token"] = None
+    # 5xx / other transient errors: leave the refresh token in place to retry.
+    return None
 
 
 async def _fetch_oauth_token() -> str:
@@ -258,18 +279,34 @@ async def _fetch_oauth_token() -> str:
     return _token_cache["token"]
 
 
-async def _get_token(force_refresh: bool = False) -> str:
+async def _get_token(invalid_token: str | None = None) -> str:
+    """Return a usable bearer token, refreshing if needed.
+
+    Pass the token that just drew a 401 as `invalid_token`: a coroutine whose
+    request was rejected then either reuses a token another coroutine already
+    refreshed, or — if it's the first to notice — does the single refresh
+    itself. The refresh path is serialized by _token_lock so concurrent callers
+    never stampede the (single-use, rotating) refresh token."""
     static = os.getenv("RAM_TOKEN")
     if static:
         return static
-    if not force_refresh and _token_cache["token"] and time.time() < _token_cache["expires_at"]:
-        return _token_cache["token"]
-    refreshed = await _refresh_token_grant()
-    if refreshed:
-        return refreshed
-    if os.getenv("SAS_CLIENT_ID"):
-        return await _fetch_oauth_token()
-    raise RamError(401, "Not signed in — click “Sign in” in the header to authenticate with RAM.")
+    # Fast path: a valid, not-just-rejected cached token. No lock, no refresh —
+    # so normal operation pays nothing for the serialization below.
+    cached = _token_cache["token"]
+    if cached and cached != invalid_token and time.time() < _token_cache["expires_at"]:
+        return cached
+    async with _token_lock:
+        # Re-check under the lock: another coroutine may have refreshed while we
+        # waited, in which case we just reuse its freshly stored token.
+        cached = _token_cache["token"]
+        if cached and cached != invalid_token and time.time() < _token_cache["expires_at"]:
+            return cached
+        refreshed = await _refresh_token_grant()
+        if refreshed:
+            return refreshed
+        if os.getenv("SAS_CLIENT_ID"):
+            return await _fetch_oauth_token()
+        raise RamError(401, "Not signed in — click “Sign in” in the header to authenticate with RAM.")
 
 
 # ─── HTTP helper ─────────────────────────────────────────────────────
@@ -285,9 +322,13 @@ async def _request(method: str, path: str, *, params: dict | None = None, json: 
     async with httpx.AsyncClient(verify=VERIFY_SSL, timeout=TIMEOUT) as client:
         r = await client.request(method, f"{RAM_API_URL}{path}", params=params, json=json,
                                  headers={"Authorization": f"Bearer {token}"})
-        # One retry on 401 in case a cached OAuth token just expired
+        # One retry on 401 in case the access token just expired. Hand the
+        # rejected token to _get_token so the refresh stays single-flight: if a
+        # concurrent call already refreshed we reuse its token, and we never
+        # refresh a token that's already been rotated (which Keycloak would
+        # treat as reuse and revoke the whole session).
         if r.status_code == 401 and not os.getenv("RAM_TOKEN"):
-            token = await _get_token(force_refresh=True)
+            token = await _get_token(invalid_token=token)
             r = await client.request(method, f"{RAM_API_URL}{path}", params=params, json=json,
                                      headers={"Authorization": f"Bearer {token}"})
     if r.status_code >= 400:
@@ -349,7 +390,42 @@ def _target_ids(q: dict) -> dict:
 async def list_session_queries(session_id: str) -> list[dict]:
     body = await _request("GET", "/query", params={"filter": f"eq(querySessionId,'{session_id}')", "limit": 100})
     items = body.get("items") or []
-    return [_normalize_query(q) for q in items]
+    # A conversation turn is a top-level *user* query. Querying an agent also
+    # records the agent's own internal sub-queries (origin "agent", each with a
+    # parentQueryId) under the same session id — rendering those as chat bubbles
+    # is what made reloaded conversations look garbled. Keep only the user turns.
+    turns = [q for q in items
+             if (q.get("origin") or "user") == "user" and not q.get("parentQueryId")]
+    normalized = [_normalize_query(q) for q in turns]
+    # Re-attach each agent turn's tool calls (with their outputs) so an inline
+    # map renders on reload exactly like a live answer. RAM's persisted
+    # response.toolCalls omits the tool *outputs* where the tomtom-render-map
+    # spec lives, so without this the map would be missing from history.
+    await _attach_tool_outputs([n for n in normalized
+                                if n.get("queryId") and n.get("target") == "agent"])
+    return normalized
+
+
+async def _attach_tool_outputs(turns: list[dict], *, concurrency: int = 8) -> None:
+    """Fetch /toolCalls for each turn and stash them under `trace` (bounded
+    concurrency so a long history doesn't stampede RAM). Best-effort: a turn
+    whose trace can't be fetched simply renders without its map."""
+    if not turns:
+        return
+    sem = asyncio.Semaphore(concurrency)
+
+    async def one(turn: dict) -> None:
+        async with sem:
+            try:
+                body = await _request("GET", "/toolCalls",
+                                      params={"filter": f"eq(parentQueryId,'{turn['queryId']}')", "limit": 100})
+            except Exception:
+                return
+            items = body.get("items") or []
+            if items:
+                turn["trace"] = {"toolCalls": items}
+
+    await asyncio.gather(*(one(t) for t in turns), return_exceptions=True)
 
 
 async def submit_query(content: str, *, agent_id: str | None = None,
@@ -462,6 +538,8 @@ def _normalize_query(q: dict) -> dict:
         "usage": response.get("usageMetadata") or {},
         "target": q.get("target"),
         "targetId": q.get("targetId"),
+        "origin": q.get("origin"),
+        "parentQueryId": q.get("parentQueryId"),
         "errorCode": q.get("errorCode", 0),
         "errorText": q.get("errorText"),
     }

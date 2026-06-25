@@ -16,6 +16,10 @@ const NEW_TITLE = 'New conversation';
 function messagesFromQueries(queries) {
   const msgs = [WELCOME];
   for (const q of queries) {
+    // Only top-level user turns are chat bubbles. Agent runs spawn internal
+    // sub-queries (origin "agent" / a parentQueryId) under the same session —
+    // those are agent-to-agent calls, not messages, so never render them.
+    if (q.parentQueryId || (q.origin && q.origin !== 'user')) continue;
     msgs.push({ role: 'user', type: 'text', content: q.content });
     if (q.errorCode && q.errorCode !== 0) {
       msgs.push({ role: 'assistant', type: 'text', content: `Error: ${q.errorText || 'query failed'}`, isError: true });

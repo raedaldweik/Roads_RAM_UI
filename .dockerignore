@@ -1,0 +1,14 @@
+# Keep local artifacts and secrets out of the Docker build context.
+# The frontend is built fresh inside the image, so never ship local copies.
+**/node_modules
+**/dist
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.local
+**/.env.*.local
+.venv
+venv
+.git
+.gitignore
+.DS_Store
