@@ -369,6 +369,14 @@ async def list_collections() -> list[dict]:
 
 
 async def list_sessions() -> list[dict]:
+    # In a shared-identity deployment (one RAM token/login for several users —
+    # e.g. a bootcamp) every user queries RAM as the same identity, so RAM's
+    # session history is shared: each person would see everyone else's
+    # conversations in "Recent conversations". Set RAM_HIDE_HISTORY=true to
+    # suppress the shared list — each browser then keeps only its own live
+    # session. (True per-user history requires per-user RAM logins.)
+    if os.getenv("RAM_HIDE_HISTORY", "").lower() == "true":
+        return []
     body = await _request("GET", "/querySessions", params={"limit": 100, "sortBy": "updateTimestamp:descending"})
     sessions = body.get("items") or []
     # Annotate each session with the agent/collections its queries targeted so
@@ -406,6 +414,11 @@ def _target_ids(q: dict) -> dict:
 async def list_session_queries(session_id: str) -> list[dict]:
     body = await _request("GET", "/query", params={"filter": f"eq(querySessionId,'{session_id}')", "limit": 100})
     items = body.get("items") or []
+    # Order chronologically — RAM doesn't guarantee an order on this endpoint,
+    # and an unordered list reconstructs the conversation with turns scrambled.
+    # ISO-8601 timestamps sort lexically; undated items sink to the top stably.
+    items.sort(key=lambda q: (q.get("creationTimeStamp") or q.get("creationTimestamp")
+                              or q.get("insertTimestamp") or q.get("modifiedTimeStamp") or ""))
     # A conversation turn is a top-level *user* query. Querying an agent also
     # records the agent's own internal sub-queries (origin "agent", each with a
     # parentQueryId) under the same session id — rendering those as chat bubbles
