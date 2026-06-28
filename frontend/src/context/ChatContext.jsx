@@ -102,18 +102,16 @@ export function ChatProvider({ children }) {
   const deleteChat = useCallback((chatId) => {
     setChats(p => {
       const filtered = p.filter(c => c.id !== chatId);
-      if (filtered.length === 0)
-        return [{ id: id(), sessionId: null, title: NEW_TITLE, messages: [WELCOME], loaded: true }];
-      return filtered;
+      const next = filtered.length === 0
+        ? [{ id: id(), sessionId: null, title: NEW_TITLE, messages: [WELCOME], loaded: true }]
+        : filtered;
+      // Keep the active chat valid against the *new* list (derived here, not
+      // from a possibly-stale closure): if the deleted chat was active, or the
+      // list was reset to a fresh chat, switch to the first remaining chat.
+      setActiveChatId(curr => (next.some(c => c.id === curr) ? curr : next[0].id));
+      return next;
     });
-    setActiveChatId(prev => {
-      if (prev === chatId) {
-        const remaining = chats.filter(c => c.id !== chatId);
-        return remaining.length > 0 ? remaining[0].id : prev;
-      }
-      return prev;
-    });
-  }, [chats]);
+  }, []);
 
   return (
     <ChatContext.Provider value={{ chats, activeChat, activeChatId, setActiveChatId, createNewChat, addMessage, setChatSession, renameChat, deleteChat }}>
