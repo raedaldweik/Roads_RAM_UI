@@ -3,7 +3,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ToolCallTrace from './ToolCallTrace';
 import MapCard from './MapCard';
+import ChartCard from './ChartCard';
 import { extractMapSpec } from '../services/mapSpec';
+import { extractChartSpecs } from '../services/chartSpec';
 
 const sourceLabel = (doc, i) => {
   const meta = doc?.metadata || {};
@@ -42,6 +44,7 @@ export default function ResponseCard({ data, onOpenSource, onOpenDetails }) {
   // Memoize so the map spec keeps a stable identity across re-renders (e.g. the
   // live-trace polling of the next query), otherwise MapCard rebuilds the map.
   const mapSpec = useMemo(() => extractMapSpec(data), [data]);
+  const chartSpecs = useMemo(() => extractChartSpecs(data), [data]);
 
   return (
     <div className="animate-slide-up space-y-2.5 max-w-[640px]">
@@ -56,6 +59,9 @@ export default function ResponseCard({ data, onOpenSource, onOpenDetails }) {
 
       {/* Interactive TomTom map, when the agent called tomtom-render-map */}
       {mapSpec && <MapCard spec={mapSpec} />}
+
+      {/* Interactive charts, when the agent called render_chart */}
+      {chartSpecs.map((spec, i) => <ChartCard key={i} spec={spec} />)}
 
       {/* Retrieved context — click to view the passage */}
       {data.context && data.context.length > 0 && (

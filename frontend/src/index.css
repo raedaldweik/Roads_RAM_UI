@@ -405,3 +405,42 @@ html, body {
   box-shadow: 0 2px 8px rgba(15,23,42,0.12);
   border: 1px solid var(--glass-border);
 }
+
+/* ═══ ChartCard — interactive render_chart spec, RTA-themed ═══ */
+.cc-wrap { margin-top: 8px; max-width: 100%; }
+.cc-title {
+  font-size: 12.5px; font-weight: 700; color: var(--gold);
+  margin: 0 2px 2px; letter-spacing: 0.01em;
+}
+.cc-sub { font-size: 11px; color: var(--text-dim); margin: 0 2px 6px; }
+.cc-plot {
+  position: relative;
+  border-radius: 14px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  padding: 10px 12px 6px;
+}
+.cc-svg { width: 100%; height: auto; display: block; }
+.cc-tip {
+  position: absolute; pointer-events: none; z-index: 5;
+  transform: translate(14px, -50%);
+  min-width: 120px; padding: 7px 9px; border-radius: 10px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
+  font-size: 11.5px;
+}
+.cc-tip-label { font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+.cc-tip-row { display: flex; align-items: center; gap: 6px; line-height: 1.6; }
+.cc-tip-dot { width: 9px; height: 9px; border-radius: 999px; flex: none; }
+.cc-tip-name { color: var(--text-md); margin-right: auto; }
+.cc-tip-val { color: var(--text); font-weight: 700; }
+.cc-legend {
+  display: flex; flex-wrap: wrap; gap: 10px 14px;
+  margin: 8px 2px 2px; font-size: 11px; color: var(--text-md);
+}
+.cc-leg-item { display: inline-flex; align-items: center; gap: 5px; }
+.cc-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
