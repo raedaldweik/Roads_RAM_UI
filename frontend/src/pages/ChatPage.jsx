@@ -107,10 +107,23 @@ export default function ChatPage() {
         // calls RAM has recorded so far as live activity under the indicator.
         const interval = Math.max((sub.pollInterval || 2) * 1000, 1000);
         const deadline = Date.now() + (sub.timeout || 600) * 1000;
+        let consecutiveErrors = 0;
         for (;;) {
           await sleep(interval);
           getQueryTrace(sub.queryId).then(setLiveTrace).catch(() => {});
-          const st = await getQueryStatus(sub.queryId);
+          let st;
+          try {
+            st = await getQueryStatus(sub.queryId);
+            consecutiveErrors = 0;
+          } catch (e) {
+            // A single failed poll (e.g. a brief RAM/gateway drop under load)
+            // shouldn't kill the turn — the query is still running on the
+            // server. Keep polling; give up only after several in a row.
+            if (++consecutiveErrors >= 5) throw e;
+            if (Date.now() >= deadline)
+              throw new Error(`RAM did not answer within ${sub.timeout || 600}s — the query may still be running on the server.`);
+            continue;
+          }
           if (st.done) { res = st.result; break; }
           if (Date.now() >= deadline)
             throw new Error(`RAM did not answer within ${sub.timeout || 600}s — the query may still be running on the server.`);
