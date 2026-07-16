@@ -1,9 +1,9 @@
-# TomTom Agent — interactive maps in the RTA RAM UI
+# TomTom Agent — interactive maps in the SAS RAM UI
 
-This is the third RTA agent (after the legal RAG assistant and the SAS data‑science
+This is the third agent (after the legal RAG assistant and the SAS data‑science
 agent). It gives the agent live geospatial powers — geocoding, routing, traffic
 incidents, POIs, isochrones — and renders the result as a **pretty, interactive,
-RTA‑themed map** inside this custom UI.
+SAS‑themed map** inside this custom UI.
 
 ## How it works
 
@@ -19,7 +19,7 @@ RAM returns answer + toolCalls  ──►  this UI  ──►  MapCard (MapLibre
   emits a **spec** via `tomtom-render-map` instead of a picture. The custom UI
   picks the spec out of the tool‑call output (`extractMapSpec`) and draws a live
   map (`MapCard.jsx`) — the same idea as the SAS `render_chart` flow.
-- The map is themed to match the UI (pearl/glass chrome, RTA‑red routes & markers,
+- The map is themed to match the UI (pearl/glass chrome, SAS‑blue routes & markers,
   glass popups), defaults to Dubai, and is bounded to the UAE.
 
 ## 1. Register the TomTom MCP in RAM

@@ -646,7 +646,7 @@ def _mock_dubai_map_spec() -> dict:
              "category": "Shopping", "color": "#0e7490"},
         ],
         "routes": [{
-            "label": "Fastest route", "color": "#b91c2c",
+            "label": "Fastest route", "color": "#0766d1",
             "distanceMeters": 21500, "travelTimeSeconds": 1320,
             "points": [
                 {"lat": 25.1972, "lon": 55.2744}, {"lat": 25.1850, "lon": 55.2600},
