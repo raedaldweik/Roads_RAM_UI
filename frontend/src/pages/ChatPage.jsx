@@ -244,7 +244,7 @@ export default function ChatPage() {
 
       {/* Main chat area */}
       <div className="flex-1 glass-card flex flex-col relative" style={{ boxShadow: 'var(--glass-shadow-lg)' }}>
-        <img src="/ncgr-logo.png" alt="" className="chat-watermark" onError={e => e.target.style.display='none'} />
+        <img src="/sas-logo.png" alt="" className="chat-watermark" onError={e => e.target.style.display='none'} />
 
         {/* Header: conversation title + agent dropdown */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(15,23,42,0.07)] relative z-[5]">
@@ -269,7 +269,7 @@ export default function ChatPage() {
               ) : (
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1"
                   style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
-                  <img src="/ncgr-logo.png" alt="Assistant" className="w-full h-full object-contain" />
+                  <img src="/sas-logo.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
               )}
               {/* Bubble */}
@@ -304,7 +304,7 @@ export default function ChatPage() {
               <div className="flex gap-2.5 animate-fade-up">
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1"
                   style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
-                  <img src="/ncgr-logo.png" alt="Assistant" className="w-full h-full object-contain" />
+                  <img src="/sas-logo.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
                 <div className="msg-bot-bubble px-4 py-3 min-w-[180px]">
                   {/* Live agent activity — tool/LLM/RAG calls recorded so far */}
