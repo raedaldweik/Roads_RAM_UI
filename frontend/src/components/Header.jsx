@@ -77,7 +77,7 @@ export default function Header() {
   return (
     <header className="app-header">
       {/* SAS logo — left */}
-      <img className="sas-logo" src="/sas-logo.svg" alt="SAS"
+      <img className="sas-logo" src="/sas-logo.png" alt="SAS"
         onError={e => { e.target.style.display = 'none'; }} />
 
       {/* Title + blue accent line */}
@@ -118,7 +118,7 @@ export default function Header() {
           <div className="glass-card w-full max-w-[440px] p-7 animate-slide-up"
             style={{ background: 'rgba(255,255,255,0.95)' }}>
             <div className="flex items-center gap-3 mb-5">
-              <img src="/sas-logo.svg" alt="" className="w-10 h-10 rounded-lg" />
+              <img src="/sas-logo.png" alt="" className="w-10 h-10 rounded-lg" />
               <div>
                 <p className="text-sm font-bold" style={{ color: 'var(--text)' }}>Sign in to your assistant</p>
                 <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>
