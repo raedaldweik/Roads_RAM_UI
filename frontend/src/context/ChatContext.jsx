@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getSessions, getSessionQueries } from '../services/api';
+import { getSessions, getSessionQueries, deleteSession } from '../services/api';
 
 const ChatContext = createContext();
 
@@ -100,6 +100,14 @@ export function ChatProvider({ children }) {
   }, []);
 
   const deleteChat = useCallback((chatId) => {
+    // Delete the RAM session too, so the conversation doesn't reappear in
+    // "Recent conversations" on the next reload (or in anyone else's browser
+    // in a shared-identity deployment). Optimistic: the chat leaves the list
+    // immediately; if the server delete fails it resurfaces on reload, which
+    // is exactly the old local-only behavior.
+    const target = chats.find(c => c.id === chatId);
+    if (target?.sessionId)
+      deleteSession(target.sessionId).catch(e => console.warn('RAM session delete failed:', e.message));
     setChats(p => {
       const filtered = p.filter(c => c.id !== chatId);
       const next = filtered.length === 0
@@ -111,7 +119,7 @@ export function ChatProvider({ children }) {
       setActiveChatId(curr => (next.some(c => c.id === curr) ? curr : next[0].id));
       return next;
     });
-  }, []);
+  }, [chats]);
 
   return (
     <ChatContext.Provider value={{ chats, activeChat, activeChatId, setActiveChatId, createNewChat, addMessage, setChatSession, renameChat, deleteChat }}>

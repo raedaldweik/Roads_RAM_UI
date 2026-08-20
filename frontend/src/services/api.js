@@ -36,6 +36,10 @@ export const getSessions = () => req('/api/sessions');
 export const getSessionQueries = (sessionId) =>
   req(`/api/sessions/${encodeURIComponent(sessionId)}/queries`);
 
+// Deletes the session in RAM itself (not just this browser's list)
+export const deleteSession = (sessionId) =>
+  req(`/api/sessions/${encodeURIComponent(sessionId)}`, { method: 'DELETE' });
+
 // target: { type: 'agent', id } or { type: 'collection', id }
 // attachments: [{ name, text }] — extracted documents inlined into the query
 // Returns { queryId, querySessionId, pollInterval, timeout, result? } —

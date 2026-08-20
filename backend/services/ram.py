@@ -33,6 +33,7 @@ import secrets
 import time
 import uuid
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -411,6 +412,32 @@ def _target_ids(q: dict) -> dict:
     }
 
 
+async def delete_session(session_id: str) -> dict:
+    """Delete a query session server-side, so it disappears from RAM's history
+    (and this UI's "Recent conversations") for good.
+
+    A 404 from the DELETE is ambiguous: either the session is already gone
+    (fine — deletes are idempotent) or this RAM build doesn't expose the
+    endpoint at all. Disambiguate by checking whether the session still
+    exists, so an unsupported endpoint surfaces as a clear error instead of
+    a silent no-op that lets the conversation resurface on the next reload.
+    """
+    try:
+        await _request("DELETE", f"/querySessions/{quote(session_id, safe='')}")
+        return {"ok": True}
+    except RamError as e:
+        if e.status == 405 or e.status == 501:
+            raise RamError(e.status, "This RAM deployment does not support deleting query sessions.")
+        if e.status != 404:
+            raise
+    body = await _request("GET", "/querySessions",
+                          params={"filter": f"eq(id,'{session_id}')", "limit": 1})
+    if body.get("items"):
+        raise RamError(501, "This RAM deployment does not support deleting query sessions "
+                            "(DELETE /querySessions/{id} returned 404 but the session still exists).")
+    return {"ok": True}
+
+
 async def list_session_queries(session_id: str) -> list[dict]:
     body = await _request("GET", "/query", params={"filter": f"eq(querySessionId,'{session_id}')", "limit": 100})
     items = body.get("items") or []
@@ -669,10 +696,22 @@ async def _mock_request(method: str, path: str, *, params: dict | None = None, j
         return {"items": _MOCK_AGENTS, "count": len(_MOCK_AGENTS)}
     if path == "/collections":
         return {"items": _MOCK_COLLECTIONS, "count": len(_MOCK_COLLECTIONS)}
-    if path == "/querySessions":
+    if path == "/querySessions" and method == "GET":
+        filt = params.get("filter", "")
+        if "'" in filt:
+            sid = filt.split("'")[1]
+            found = [s for s in (_mock_sessions.get(sid),) if s]
+            return {"items": [{k: s[k] for k in ("id", "title", "insertTimestamp", "updateTimestamp")} for s in found],
+                    "count": len(found)}
         items = sorted(_mock_sessions.values(), key=lambda s: s["updateTimestamp"], reverse=True)
         return {"items": [{k: s[k] for k in ("id", "title", "insertTimestamp", "updateTimestamp")} for s in items],
                 "count": len(items)}
+    if path.startswith("/querySessions/") and method == "DELETE":
+        session = _mock_sessions.pop(path.rsplit("/", 1)[-1], None)
+        if session:
+            for q in session["queries"]:
+                _mock_traces.pop(q["id"], None)
+        return None
     if path == "/query" and method == "GET":
         filt = params.get("filter", "")
         if "'" in filt:

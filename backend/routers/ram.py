@@ -131,6 +131,13 @@ async def session_queries(session_id: str):
     return await _wrap(ram.list_session_queries(session_id))
 
 
+@router.delete("/sessions/{session_id}")
+async def delete_session(session_id: str):
+    """Delete a query session in RAM itself — the conversation is removed
+    from RAM's history, not just hidden in this browser."""
+    return await _wrap(ram.delete_session(session_id))
+
+
 @router.post("/query")
 async def query(body: QueryRequest):
     """Submit a query asynchronously. Returns {queryId, querySessionId,

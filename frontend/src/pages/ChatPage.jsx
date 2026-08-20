@@ -223,7 +223,13 @@ export default function ChatPage() {
                       <button onClick={() => startRename(chat)} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[rgba(7,102,209,0.05)]" style={{ color: 'var(--text-md)' }}>
                         Rename
                       </button>
-                      <button onClick={() => { deleteChat(chat.id); setChatMenu(null); }} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[var(--red-bg)]" style={{ color: 'var(--red)' }}>
+                      <button onClick={() => {
+                        setChatMenu(null);
+                        // A chat with a sessionId is also deleted in RAM — that
+                        // erases the conversation for everyone, so confirm first.
+                        if (!chat.sessionId || window.confirm('Delete this conversation? It will also be removed from RAM permanently.'))
+                          deleteChat(chat.id);
+                      }} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[var(--red-bg)]" style={{ color: 'var(--red)' }}>
                         Delete
                       </button>
                     </div>
