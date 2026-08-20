@@ -12,6 +12,20 @@ const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6
 
 const NEW_TITLE = 'New conversation';
 
+// The RAM v1 API has no DELETE /querySessions/{id} (confirmed against the
+// OpenAPI spec), so a "deleted" session usually still exists server-side and
+// would reappear in "Recent conversations" on every reload. Track deleted
+// session ids in localStorage so they stay gone in this browser regardless.
+const HIDDEN_KEY = 'ram_hidden_sessions';
+const hiddenSessions = (() => {
+  try { return new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]')); }
+  catch { return new Set(); }
+})();
+const hideSession = (sessionId) => {
+  hiddenSessions.add(sessionId);
+  try { localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenSessions])); } catch { /* private mode */ }
+};
+
 // Rebuild chat bubbles from RAM's persisted query records
 function messagesFromQueries(queries) {
   const msgs = [WELCOME];
@@ -42,7 +56,7 @@ export function ChatProvider({ children }) {
       setChats(prev => {
         const known = new Set(prev.map(c => c.sessionId).filter(Boolean));
         const stubs = sessions
-          .filter(s => s.id && !known.has(s.id))
+          .filter(s => s.id && !known.has(s.id) && !hiddenSessions.has(s.id))
           .map(s => ({
             id: id(), sessionId: s.id, title: s.title || 'Conversation', messages: [WELCOME], loaded: false,
             // which agent/collections this session talked to (for sidebar scoping)
@@ -100,14 +114,15 @@ export function ChatProvider({ children }) {
   }, []);
 
   const deleteChat = useCallback((chatId) => {
-    // Delete the RAM session too, so the conversation doesn't reappear in
-    // "Recent conversations" on the next reload (or in anyone else's browser
-    // in a shared-identity deployment). Optimistic: the chat leaves the list
-    // immediately; if the server delete fails it resurfaces on reload, which
-    // is exactly the old local-only behavior.
+    // Hide the session permanently in this browser (v1 RAM can't delete it
+    // server-side — see HIDDEN_KEY above), and still attempt the server
+    // delete: it's a no-op today but starts truly deleting if a future RAM
+    // version adds DELETE /querySessions/{id}.
     const target = chats.find(c => c.id === chatId);
-    if (target?.sessionId)
-      deleteSession(target.sessionId).catch(e => console.warn('RAM session delete failed:', e.message));
+    if (target?.sessionId) {
+      hideSession(target.sessionId);
+      deleteSession(target.sessionId).catch(e => console.info('RAM has no session delete endpoint (hidden locally instead):', e.message));
+    }
     setChats(p => {
       const filtered = p.filter(c => c.id !== chatId);
       const next = filtered.length === 0

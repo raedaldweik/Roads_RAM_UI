@@ -169,8 +169,6 @@ Based on the v1 OpenAPI spec:
 - Synchronous Q&A against agents (`POST /query` with `agentId`) or collections (`collectionIds`)
 - Multi-turn conversations via `querySessionId`
 - Listing/reloading past sessions and their full Q&A history
-- Deleting query sessions (`DELETE /querySessions/{id}`) — the sidebar's Delete action
-  removes the conversation from RAM itself, not just from this browser
 - Inspecting retrieved context, tool calls, LLM calls, and per-query token usage/cost
 - Async queries (`synchronous=false`) — this UI always submits asynchronously and polls,
   so slow agent runs can't be killed by gateway timeouts (tune with `RAM_QUERY_TIMEOUT`)
@@ -180,5 +178,9 @@ Based on the v1 OpenAPI spec:
 - **Streaming responses** — no SSE/websocket endpoint; answers arrive in one response,
   so the UI shows a typing indicator instead of token-by-token streaming
 - Creating/configuring agents, collections, or LLMs (read-only endpoints; manage them in the RAM web app)
-- Renaming query sessions server-side (rename in this UI is local-only; delete *is* server-side — see above)
+- Renaming or deleting query sessions server-side — `/querySessions` is GET-only in the
+  v1 spec (the only DELETEs in the API are for sources/files/tags). The sidebar's Delete
+  action therefore hides the conversation permanently in that browser (localStorage) and
+  still attempts `DELETE /querySessions/{id}` so real deletion kicks in automatically if
+  a future RAM version adds the endpoint
 - Per-message feedback (thumbs up/down) — no feedback endpoint in v1

@@ -225,9 +225,7 @@ export default function ChatPage() {
                       </button>
                       <button onClick={() => {
                         setChatMenu(null);
-                        // A chat with a sessionId is also deleted in RAM — that
-                        // erases the conversation for everyone, so confirm first.
-                        if (!chat.sessionId || window.confirm('Delete this conversation? It will also be removed from RAM permanently.'))
+                        if (!chat.sessionId || window.confirm('Delete this conversation? It will be permanently removed from your history.'))
                           deleteChat(chat.id);
                       }} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[var(--red-bg)]" style={{ color: 'var(--red)' }}>
                         Delete

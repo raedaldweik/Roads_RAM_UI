@@ -413,14 +413,19 @@ def _target_ids(q: dict) -> dict:
 
 
 async def delete_session(session_id: str) -> dict:
-    """Delete a query session server-side, so it disappears from RAM's history
-    (and this UI's "Recent conversations") for good.
+    """Delete a query session server-side.
+
+    The v1 OpenAPI spec has no DELETE /querySessions/{id} — /querySessions is
+    GET-only — so against current RAM builds this reports "not supported" and
+    the frontend falls back to hiding the session locally. The attempt is kept
+    (rather than hardcoding failure) so deletion starts working the moment a
+    RAM version ships the endpoint, and the mock supports it for UI demos.
 
     A 404 from the DELETE is ambiguous: either the session is already gone
     (fine — deletes are idempotent) or this RAM build doesn't expose the
     endpoint at all. Disambiguate by checking whether the session still
     exists, so an unsupported endpoint surfaces as a clear error instead of
-    a silent no-op that lets the conversation resurface on the next reload.
+    a silent no-op.
     """
     try:
         await _request("DELETE", f"/querySessions/{quote(session_id, safe='')}")
