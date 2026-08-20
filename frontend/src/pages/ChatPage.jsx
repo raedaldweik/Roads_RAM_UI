@@ -244,7 +244,7 @@ export default function ChatPage() {
 
       {/* Main chat area */}
       <div className="flex-1 glass-card flex flex-col relative" style={{ boxShadow: 'var(--glass-shadow-lg)' }}>
-        <img src="/sas-logo.png" alt="" className="chat-watermark" onError={e => e.target.style.display='none'} />
+        <img src="/sas-s-mark.png" alt="" className="chat-watermark" onError={e => e.target.style.display='none'} />
 
         {/* Header: conversation title + agent dropdown */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(15,23,42,0.07)] relative z-[5]">
