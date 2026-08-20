@@ -267,9 +267,9 @@ export default function ChatPage() {
                   You
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1"
+                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1.5"
                   style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
-                  <img src="/sas-logo.png" alt="Assistant" className="w-full h-full object-contain" />
+                  <img src="/sas-s-mark-white.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
               )}
               {/* Bubble */}
@@ -302,9 +302,9 @@ export default function ChatPage() {
             const steps = traceSteps(liveTrace);
             return (
               <div className="flex gap-2.5 animate-fade-up">
-                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1"
+                <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1.5"
                   style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
-                  <img src="/sas-logo.png" alt="Assistant" className="w-full h-full object-contain" />
+                  <img src="/sas-s-mark-white.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
                 <div className="msg-bot-bubble px-4 py-3 min-w-[180px]">
                   {/* Live agent activity — tool/LLM/RAG calls recorded so far */}
