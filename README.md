@@ -1,4 +1,4 @@
-# SAS Retrieval Agent Assistant
+# SAS Retrieval Agent Manager
 
 A custom chatbot UI for **SAS Retrieval Agent Manager (RAM)**, in the SAS corporate
 theme and styled identically to the reports repository's Smart Monitoring Assistant (glass panels,

@@ -83,7 +83,7 @@ export default function Header() {
       {/* Title + blue accent line */}
       <div className="title-block">
         <div className="title-row">
-          <h1 className="app-title">SAS Retrieval Agent Assistant</h1>
+          <h1 className="app-title">SAS Retrieval Agent Manager</h1>
           <div className="accent-line" />
         </div>
       </div>
