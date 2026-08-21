@@ -5,12 +5,12 @@
 
 :root {
   /* Same token names as the reports chatbot (kept for component compatibility) —
-     values re-skinned to the SAS corporate palette. */
-  --gold: #0766d1;                 /* SAS blue */
-  --gold-hi: #1f7ce6;              /* lighter blue */
-  --gold-lo: #032954;              /* SAS midnight navy */
-  --gold-grad: linear-gradient(135deg, #1f7ce6, #0766d1, #032954);
-  --nav-grad: linear-gradient(135deg, #0a1628 0%, #1e293b 45%, #14202f 75%, #243447 100%);
+     values re-skinned to the EHS palette. */
+  --gold: #0e7d3f;                 /* EHS green */
+  --gold-hi: #1ba15c;              /* lighter green */
+  --gold-lo: #0b4a2a;              /* deep forest */
+  --gold-grad: linear-gradient(135deg, #1ba15c, #0e7d3f, #0b4a2a);
+  --nav-grad: linear-gradient(135deg, #0a1f15 0%, #16352a 45%, #10281e 75%, #1e4534 100%);
 
   /* Ink ladder — same as the dashboards */
   --text: #0a1628;        /* ink-1 */
@@ -67,11 +67,11 @@ html, body {
   background:
     /* corner color whispers */
     radial-gradient(ellipse 70% 55% at 8% 5%,   rgba(255, 235, 200, 0.55) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 95% 8%,  rgba(190, 215, 240, 0.50) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 95% 8%,  rgba(195, 230, 205, 0.50) 0%, transparent 55%),
     radial-gradient(ellipse 55% 45% at 92% 95%, rgba(220, 200, 175, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 50% at 5% 95%,  rgba(200, 220, 235, 0.50) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 5% 95%,  rgba(200, 232, 210, 0.50) 0%, transparent 55%),
     /* base pearl gradient */
-    linear-gradient(140deg, #f7f3ec 0%, #e8edf3 55%, #efe7d8 100%);
+    linear-gradient(140deg, #f7f3ec 0%, #e9f1e9 55%, #efe7d8 100%);
 }
 
 /* Paper grain */
@@ -92,8 +92,8 @@ html, body {
   content: '';
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 40% 32% at 75% 25%, rgba(180, 140, 200, 0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 35% 28% at 20% 70%, rgba(140, 180, 220, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 32% at 75% 25%, rgba(150, 200, 165, 0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 35% 28% at 20% 70%, rgba(140, 205, 170, 0.14) 0%, transparent 65%),
     radial-gradient(ellipse 30% 30% at 85% 75%, rgba(220, 175, 130, 0.10) 0%, transparent 65%);
   pointer-events: none; z-index: 0;
 }
@@ -107,14 +107,14 @@ html, body {
   will-change: opacity, transform;
   mix-blend-mode: multiply;
 }
-.mega-teal   { background: radial-gradient(circle, rgba(125, 175, 215, 0.32) 0%, rgba(125, 175, 215, 0.08) 35%, transparent 70%); filter: blur(2cqw); }
-.mega-cyan   { background: radial-gradient(circle, rgba(150, 195, 225, 0.28) 0%, rgba(150, 195, 225, 0.07) 35%, transparent 70%); filter: blur(2.2cqw); }
-.mega-purple { background: radial-gradient(circle, rgba(180, 150, 200, 0.25) 0%, rgba(180, 150, 200, 0.06) 35%, transparent 70%); filter: blur(1.8cqw); }
+.mega-teal   { background: radial-gradient(circle, rgba(120, 195, 155, 0.32) 0%, rgba(120, 195, 155, 0.08) 35%, transparent 70%); filter: blur(2cqw); }
+.mega-cyan   { background: radial-gradient(circle, rgba(150, 210, 175, 0.28) 0%, rgba(150, 210, 175, 0.07) 35%, transparent 70%); filter: blur(2.2cqw); }
+.mega-purple { background: radial-gradient(circle, rgba(170, 205, 150, 0.25) 0%, rgba(170, 205, 150, 0.06) 35%, transparent 70%); filter: blur(1.8cqw); }
 .mega-amber  { background: radial-gradient(circle, rgba(220, 180, 140, 0.30) 0%, rgba(220, 180, 140, 0.08) 35%, transparent 70%); filter: blur(1.8cqw); }
-.teal-blob   { background: radial-gradient(circle, rgba(125, 175, 215, 0.28) 0%, rgba(125, 175, 215, 0.06) 50%, transparent 80%); filter: blur(0.9cqw); }
-.cyan-blob   { background: radial-gradient(circle, rgba(150, 195, 225, 0.25) 0%, rgba(150, 195, 225, 0.06) 50%, transparent 80%); filter: blur(0.85cqw); }
+.teal-blob   { background: radial-gradient(circle, rgba(120, 195, 155, 0.28) 0%, rgba(120, 195, 155, 0.06) 50%, transparent 80%); filter: blur(0.9cqw); }
+.cyan-blob   { background: radial-gradient(circle, rgba(150, 210, 175, 0.25) 0%, rgba(150, 210, 175, 0.06) 50%, transparent 80%); filter: blur(0.85cqw); }
 .amber-blob  { background: radial-gradient(circle, rgba(220, 180, 140, 0.30) 0%, rgba(220, 180, 140, 0.07) 50%, transparent 80%); filter: blur(0.7cqw); }
-.purple-blob { background: radial-gradient(circle, rgba(180, 150, 200, 0.25) 0%, rgba(180, 150, 200, 0.06) 50%, transparent 80%); filter: blur(0.9cqw); }
+.purple-blob { background: radial-gradient(circle, rgba(170, 205, 150, 0.25) 0%, rgba(170, 205, 150, 0.06) 50%, transparent 80%); filter: blur(0.9cqw); }
 
 @keyframes slow-breathe {
   0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
@@ -211,7 +211,7 @@ html, body {
     inset 0 -1px 0 rgba(255,255,255,0.20),
     inset 1px 0 0 rgba(255,255,255,0.45),
     inset -1px 0 0 rgba(255,255,255,0.30),
-    inset 0 0 30px rgba(180,200,230,0.10);
+    inset 0 0 30px rgba(180,225,195,0.10);
   position: relative;
   overflow: hidden;
 }
@@ -225,14 +225,14 @@ html, body {
   padding-left: 8px;
   border-left: 2px solid var(--gold);
   line-height: 1.25;
-  box-shadow: -1px 0 0 rgba(7,102,209,0.15);
+  box-shadow: -1px 0 0 rgba(14,125,63,0.15);
 }
 
-/* ═══ Header accent line (the reports' .red-line, SAS blue) ═══ */
+/* ═══ Header accent line (the reports' .red-line, EHS green) ═══ */
 .accent-line {
   flex: 1; min-width: 0; height: 1px;
-  background: linear-gradient(90deg, var(--gold-hi) 0%, var(--gold) 50%, rgba(7,102,209,0.4) 80%, transparent 100%);
-  box-shadow: 0 0 6px rgba(7,102,209,0.25);
+  background: linear-gradient(90deg, var(--gold-hi) 0%, var(--gold) 50%, rgba(14,125,63,0.4) 80%, transparent 100%);
+  box-shadow: 0 0 6px rgba(14,125,63,0.25);
 }
 
 /* ═══ Chat Specific ═══ */
@@ -241,6 +241,8 @@ html, body {
   transform: translate(-50%, -50%);
   width: 280px; height: 280px;
   object-fit: contain; opacity: 0.06;
+  /* shift the blue S mark toward the EHS green */
+  filter: hue-rotate(-66deg) saturate(0.85);
   pointer-events: none; z-index: 0;
 }
 
@@ -255,8 +257,8 @@ html, body {
 }
 
 .msg-user-bubble {
-  background: linear-gradient(135deg, rgba(7,102,209,0.08), rgba(7,102,209,0.03));
-  border: 1px solid rgba(7,102,209,0.14);
+  background: linear-gradient(135deg, rgba(14,125,63,0.08), rgba(14,125,63,0.03));
+  border: 1px solid rgba(14,125,63,0.14);
   border-radius: 14px;
   border-top-right-radius: 4px;
 }
@@ -278,7 +280,7 @@ html, body {
   color: white;
   border-color: var(--gold);
   transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(7,102,209,0.25);
+  box-shadow: 0 3px 10px rgba(14,125,63,0.25);
 }
 .suggestion-chip .chip-tag {
   font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em;
@@ -335,7 +337,7 @@ html, body {
   30% { transform: translateY(-7px); opacity: 1; }
 }
 
-/* ═══ MapCard — interactive TomTom map, SAS-themed ═══ */
+/* ═══ MapCard — interactive TomTom map, EHS-themed ═══ */
 .mc-wrap { margin-top: 8px; max-width: 100%; }
 .mc-title {
   font-size: 12.5px; font-weight: 700; color: var(--gold);
@@ -403,7 +405,7 @@ html, body {
   border: 1px solid var(--glass-border);
 }
 
-/* ═══ ChartCard — interactive render_chart spec, SAS-themed ═══ */
+/* ═══ ChartCard — interactive render_chart spec, EHS-themed ═══ */
 .cc-wrap { margin-top: 8px; max-width: 100%; }
 .cc-title {
   font-size: 12.5px; font-weight: 700; color: var(--gold);

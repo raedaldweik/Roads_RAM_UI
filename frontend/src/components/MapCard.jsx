@@ -19,9 +19,9 @@ const VECTOR_STYLE_URL = import.meta.env.VITE_MAP_STYLE_URL || '';
 // Set VITE_MAP_RASTER=true to force the flat raster basemap (no 3D buildings).
 const USE_RASTER = String(import.meta.env.VITE_MAP_RASTER || '').toLowerCase() === 'true';
 
-// SAS palette (mirrors src/index.css tokens).
-const SAS_BLUE = '#0766d1';
-const SAS_BLUE_HI = '#1f7ce6';
+// EHS palette (mirrors src/index.css tokens).
+const EHS_GREEN = '#0e7d3f';
+const EHS_GREEN_HI = '#1ba15c';
 const TEAL = '#0e7490';
 const INK = '#0a1628';
 
@@ -175,7 +175,7 @@ export default function MapCard({ spec }) {
         if (pts.length < 2) return;
         pts.forEach(([lng, lat]) => pushCoord(lng, lat));
         const id = `route-${i}`;
-        const color = route.color || SAS_BLUE;
+        const color = route.color || EHS_GREEN;
         map.addSource(id, { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString', coordinates: pts }, properties: {} } });
         // casing under the main line for a polished look
         map.addLayer({ id: `${id}-casing`, type: 'line', source: id, layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 8, 'line-opacity': 0.9 } });
@@ -204,10 +204,10 @@ export default function MapCard({ spec }) {
         const el = document.createElement('div');
         if (m.category) {
           el.className = 'mc-dot';
-          el.style.background = m.color || SAS_BLUE_HI;
+          el.style.background = m.color || EHS_GREEN_HI;
         } else {
           el.className = 'mc-pin';
-          el.style.color = m.color || SAS_BLUE;
+          el.style.color = m.color || EHS_GREEN;
           el.innerHTML = '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
         }
         const marker = new maplibregl.Marker({ element: el, anchor: m.category ? 'center' : 'bottom' })
@@ -286,10 +286,10 @@ export default function MapCard({ spec }) {
           <button
             className="mc-traffic-btn"
             onClick={() => setTrafficOn((v) => !v)}
-            style={{ borderColor: trafficOn ? SAS_BLUE : 'rgba(15,23,42,0.12)', color: trafficOn ? SAS_BLUE : INK }}
+            style={{ borderColor: trafficOn ? EHS_GREEN : 'rgba(15,23,42,0.12)', color: trafficOn ? EHS_GREEN : INK }}
             title="Toggle live traffic"
           >
-            <span className="mc-traffic-dot" style={{ background: trafficOn ? SAS_BLUE : '#94a3b8' }} />
+            <span className="mc-traffic-dot" style={{ background: trafficOn ? EHS_GREEN : '#94a3b8' }} />
             Traffic
           </button>
         )}

@@ -197,17 +197,17 @@ export default function ChatPage() {
                       className={`flex-1 flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs text-left truncate transition-all ${
                         chat.id === activeChatId
                           ? 'font-semibold'
-                          : 'hover:bg-[rgba(7,102,209,0.05)] border border-transparent'
+                          : 'hover:bg-[rgba(14,125,63,0.05)] border border-transparent'
                       }`}
                       style={chat.id === activeChatId
-                        ? { color: 'var(--gold-lo)', background: 'rgba(7,102,209,0.14)', border: '1px solid rgba(7,102,209,0.30)', borderLeft: '3px solid var(--gold)' }
+                        ? { color: 'var(--gold-lo)', background: 'rgba(14,125,63,0.14)', border: '1px solid rgba(14,125,63,0.30)', borderLeft: '3px solid var(--gold)' }
                         : { color: 'var(--text-md)' }
                       }>
                       <span className="text-sm">💬</span>
                       <span className="truncate flex-1">{chat.title}</span>
                     </button>
                     <button onClick={e => { e.stopPropagation(); setChatMenu(menuOpen ? null : chat.id); }}
-                      className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-[rgba(7,102,209,0.1)] transition-all shrink-0 ml-0.5"
+                      className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-[rgba(14,125,63,0.1)] transition-all shrink-0 ml-0.5"
                       style={{ color: 'var(--text-faint)' }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
@@ -219,8 +219,8 @@ export default function ChatPage() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setChatMenu(null)} />
                     <div className="absolute right-0 top-full mt-0.5 rounded-xl shadow-xl overflow-hidden z-50 min-w-[130px] animate-fade-up"
-                      style={{ background: 'rgba(255,255,255,0.96)', border: '1px solid rgba(7,102,209,0.2)', backdropFilter: 'blur(20px)' }}>
-                      <button onClick={() => startRename(chat)} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[rgba(7,102,209,0.05)]" style={{ color: 'var(--text-md)' }}>
+                      style={{ background: 'rgba(255,255,255,0.96)', border: '1px solid rgba(14,125,63,0.2)', backdropFilter: 'blur(20px)' }}>
+                      <button onClick={() => startRename(chat)} className="w-full flex items-center gap-2 px-3 py-2 text-[11px] hover:bg-[rgba(14,125,63,0.05)]" style={{ color: 'var(--text-md)' }}>
                         Rename
                       </button>
                       <button onClick={() => {
@@ -240,7 +240,7 @@ export default function ChatPage() {
         <div className="p-3 border-t border-[rgba(15,23,42,0.07)]">
           <button onClick={() => { createNewChat(); }}
             className="w-full py-2.5 rounded-lg text-xs font-bold transition-all"
-            style={{ border: '2px dashed rgba(7,102,209,0.35)', color: 'var(--gold)', background: 'rgba(7,102,209,0.03)' }}>
+            style={{ border: '2px dashed rgba(14,125,63,0.35)', color: 'var(--gold)', background: 'rgba(14,125,63,0.03)' }}>
             + New conversation
           </button>
         </div>
@@ -267,12 +267,12 @@ export default function ChatPage() {
               {/* Avatar */}
               {msg.role === 'user' ? (
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'rgba(7,102,209,0.12)', border: '1px solid rgba(7,102,209,0.28)', color: 'var(--gold-lo)' }}>
+                  style={{ background: 'rgba(14,125,63,0.12)', border: '1px solid rgba(14,125,63,0.28)', color: 'var(--gold-lo)' }}>
                   You
                 </div>
               ) : (
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1.5"
-                  style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
+                  style={{ background: 'var(--nav-grad)', border: '1px solid rgba(79,195,137,0.3)' }}>
                   <img src="/sas-s-mark-white.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
               )}
@@ -288,7 +288,7 @@ export default function ChatPage() {
                     style={{ color: msg.isError ? undefined : 'var(--text)' }}>
                     {msg.attachmentName && (
                       <div className="flex items-center gap-1.5 mb-2 px-2 py-1 rounded-md text-[11px] font-semibold w-fit"
-                        style={{ background: 'rgba(7,102,209,0.10)', border: '1px solid rgba(7,102,209,0.22)', color: 'var(--gold-lo)' }}>
+                        style={{ background: 'rgba(14,125,63,0.10)', border: '1px solid rgba(14,125,63,0.22)', color: 'var(--gold-lo)' }}>
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                           <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
                         </svg>
@@ -307,7 +307,7 @@ export default function ChatPage() {
             return (
               <div className="flex gap-2.5 animate-fade-up">
                 <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center p-1.5"
-                  style={{ background: 'var(--nav-grad)', border: '1px solid rgba(59,155,232,0.3)' }}>
+                  style={{ background: 'var(--nav-grad)', border: '1px solid rgba(79,195,137,0.3)' }}>
                   <img src="/sas-s-mark-white.png" alt="Assistant" className="w-full h-full object-contain" />
                 </div>
                 <div className="msg-bot-bubble px-4 py-3 min-w-[180px]">
@@ -357,13 +357,13 @@ export default function ChatPage() {
               </div>
             ) : attaching ? (
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11.5px]"
-                style={{ background: 'rgba(7,102,209,0.07)', border: '1px solid rgba(7,102,209,0.20)', color: 'var(--text-dim)' }}>
+                style={{ background: 'rgba(14,125,63,0.07)', border: '1px solid rgba(14,125,63,0.20)', color: 'var(--text-dim)' }}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'var(--gold)' }} />
                 Reading document…
               </div>
             ) : (
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11.5px] font-semibold"
-                style={{ background: 'rgba(7,102,209,0.08)', border: '1px solid rgba(7,102,209,0.25)', color: 'var(--gold-lo)' }}>
+                style={{ background: 'rgba(14,125,63,0.08)', border: '1px solid rgba(14,125,63,0.25)', color: 'var(--gold-lo)' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
                 </svg>
@@ -380,14 +380,14 @@ export default function ChatPage() {
 
         {/* Input bar */}
         <div className="px-5 pb-4 pt-2 relative z-[1]">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl border border-[rgba(15,23,42,0.10)] transition-all focus-within:border-[var(--gold-hi)] focus-within:shadow-[0_0_0_3px_rgba(7,102,209,0.10)]"
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl border border-[rgba(15,23,42,0.10)] transition-all focus-within:border-[var(--gold-hi)] focus-within:shadow-[0_0_0_3px_rgba(14,125,63,0.10)]"
             style={{ background: 'var(--glass-strong)', backdropFilter: 'blur(12px)' }}>
             {/* Attach document */}
             <input ref={fileRef} type="file" className="hidden" onChange={pickFile}
               accept=".pdf,.docx,.txt,.md,.csv,.json,.log,.xml,.html,.yaml,.yml,.sas,.sql,.py" />
             <button onClick={() => fileRef.current?.click()} disabled={attaching}
               title="Attach a document (PDF, DOCX, TXT, CSV…) — its text is sent with your question"
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all hover:bg-[rgba(7,102,209,0.08)] disabled:opacity-40"
+              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all hover:bg-[rgba(14,125,63,0.08)] disabled:opacity-40"
               style={{ color: attachment ? 'var(--gold)' : 'var(--text-dim)' }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
@@ -405,7 +405,7 @@ export default function ChatPage() {
 
             <button onClick={() => send()}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 hover:scale-105 transition-transform"
-              style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(7,102,209,0.30)' }}>
+              style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(14,125,63,0.30)' }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>

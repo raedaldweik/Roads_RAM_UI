@@ -6,7 +6,7 @@ const ChatContext = createContext();
 const WELCOME = {
   role: 'assistant',
   type: 'text',
-  content: "Welcome to the SAS Retrieval Agent Manager. Pick an agent (or collection) from the dropdown above and ask me anything — answers are grounded in your indexed documents.",
+  content: "Welcome to the SAS EHS Assistant. Pick an agent (or collection) from the dropdown above and ask me anything — answers are grounded in your indexed documents.",
 };
 const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 

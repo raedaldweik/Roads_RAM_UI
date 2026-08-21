@@ -83,7 +83,7 @@ export default function Header() {
       {/* Title + blue accent line */}
       <div className="title-block">
         <div className="title-row">
-          <h1 className="app-title">SAS Retrieval Agent Manager</h1>
+          <h1 className="app-title">SAS EHS Assistant</h1>
           <div className="accent-line" />
         </div>
       </div>
@@ -105,7 +105,7 @@ export default function Header() {
         {needsSignin && (
           <button onClick={beginSignin}
             className="px-4 py-1.5 rounded-full text-[11px] font-bold text-white hover:scale-105 transition-transform"
-            style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(7,102,209,0.30)' }}>
+            style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(14,125,63,0.30)' }}>
             Sign in
           </button>
         )}
@@ -142,7 +142,7 @@ export default function Header() {
                 </p>
                 <a href={signin.authorizeUrl} target="_blank" rel="noreferrer"
                   className="block w-full text-center py-2.5 rounded-lg text-[12.5px] font-bold text-white mb-4 hover:opacity-90 transition-opacity"
-                  style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(7,102,209,0.30)' }}>
+                  style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(14,125,63,0.30)' }}>
                   Open sign-in page ↗
                 </a>
                 <div className="flex gap-2">
@@ -150,7 +150,7 @@ export default function Header() {
                     onKeyDown={e => e.key === 'Enter' && submitCode()}
                     placeholder="Paste authorization code…" autoFocus
                     className="flex-1 rounded-lg px-3 py-2.5 text-[13px] border outline-none font-mono tracking-wide"
-                    style={{ background: 'rgba(255,255,255,0.7)', borderColor: 'rgba(7,102,209,0.35)', color: 'var(--text)' }} />
+                    style={{ background: 'rgba(255,255,255,0.7)', borderColor: 'rgba(14,125,63,0.35)', color: 'var(--text)' }} />
                   <button onClick={submitCode} disabled={submitting}
                     className="px-4 rounded-lg text-[12px] font-bold text-white disabled:opacity-50"
                     style={{ background: 'var(--gold-grad)' }}>
@@ -164,14 +164,14 @@ export default function Header() {
                   Open the verification page, sign in with your RAM credentials, and enter this code:
                 </p>
                 <div className="rounded-xl py-4 text-center mb-4"
-                  style={{ background: 'rgba(7,102,209,0.07)', border: '1px dashed rgba(7,102,209,0.35)' }}>
+                  style={{ background: 'rgba(14,125,63,0.07)', border: '1px dashed rgba(14,125,63,0.35)' }}>
                   <span className="text-2xl font-extrabold tracking-[0.3em]" style={{ color: 'var(--gold)' }}>
                     {signin.userCode}
                   </span>
                 </div>
                 <a href={signin.verificationUriComplete || signin.verificationUri} target="_blank" rel="noreferrer"
                   className="block w-full text-center py-2.5 rounded-lg text-[12.5px] font-bold text-white mb-3 hover:opacity-90 transition-opacity"
-                  style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(7,102,209,0.30)' }}>
+                  style={{ background: 'var(--gold-grad)', boxShadow: '0 3px 12px rgba(14,125,63,0.30)' }}>
                   Open verification page ↗
                 </a>
                 <div className="flex items-center justify-center gap-2 text-[11px]" style={{ color: 'var(--text-dim)' }}>

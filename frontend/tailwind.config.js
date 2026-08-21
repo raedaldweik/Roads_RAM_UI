@@ -6,13 +6,13 @@ export default {
       colors: {
         brand: {
           // Keep the same class names (bg-brand-gold, bg-brand-navy) so no components need to change
-          gold: '#0766d1',          // SAS blue — class names kept for minimal churn
-          'gold-light': '#1f7ce6',
+          gold: '#0e7d3f',          // EHS green — class names kept for minimal churn
+          'gold-light': '#1ba15c',
           navy: '#0a1628',          // deep navy
           'navy-deep': '#060d18',
           'navy-mid': '#243447',
           cream: '#f7f3ec',
-          maroon: '#032954',        // alias (SAS midnight navy)
+          maroon: '#0b4a2a',        // alias (deep forest green)
         }
       },
       fontFamily: {

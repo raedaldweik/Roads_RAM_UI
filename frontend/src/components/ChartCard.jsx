@@ -9,9 +9,9 @@ import { useMemo, useRef, useState } from 'react';
  * no plotting; this component draws the spec.
  */
 
-// SAS-themed categorical palette (mirrors src/index.css tokens).
-const PALETTE = ['#0766d1', '#0e7490', '#b45309', '#047857', '#032954',
-                 '#475569', '#1f7ce6', '#0891b2', '#92400e', '#1e293b'];
+// EHS-themed categorical palette (mirrors src/index.css tokens).
+const PALETTE = ['#0e7d3f', '#0e7490', '#b45309', '#3b6ea5', '#0b4a2a',
+                 '#475569', '#1ba15c', '#0891b2', '#92400e', '#1e293b'];
 
 const VB_W = 720;
 const VB_H = 380;
